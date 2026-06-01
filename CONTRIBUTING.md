@@ -26,7 +26,7 @@ Thanks for your interest in contributing! This document covers everything you ne
 
 ## Development setup
 
-Requirements: **Node 18+** and **npm 9+**. The repository ships an `npm` lockfile; please use `npm` to keep CI reproducible.
+Requirements: **Node 20+** and **npm 9+**. The repository ships an `npm` lockfile; please use `npm` to keep CI reproducible.
 
 ```bash
 git clone https://github.com/wardsvelds2l/pr-summary
