@@ -5,7 +5,7 @@
 [![CI](https://github.com/wardsvelds2l/pr-summary/actions/workflows/ci.yml/badge.svg)](https://github.com/wardsvelds2l/pr-summary/actions/workflows/ci.yml)
 [![GitHub release](https://img.shields.io/github/v/release/wardsvelds2l/pr-summary.svg)](https://github.com/wardsvelds2l/pr-summary/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-[![Node >= 18](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](https://github.com/wardsvelds2l/pr-summary/blob/main/package.json)
+[![Node >= 20](https://img.shields.io/badge/node-%3E%3D20-brightgreen.svg)](https://github.com/wardsvelds2l/pr-summary/blob/main/package.json)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue.svg)](https://www.typescriptlang.org/)
 [![codecov](https://codecov.io/gh/wardsvelds2l/pr-summary/branch/main/graph/badge.svg)](https://codecov.io/gh/wardsvelds2l/pr-summary)
 
@@ -288,7 +288,7 @@ To report a vulnerability, follow the process in [`SECURITY.md`](./SECURITY.md).
 We welcome PRs! Start with [`CONTRIBUTING.md`](./CONTRIBUTING.md). Highlights:
 
 - `npm install` → `npm run all` to get to a passing build.
-- New behaviour needs tests; we run the full Vitest suite in CI on Node 18/20/22 × Linux/macOS/Windows.
+- New behaviour needs tests; we run the full Vitest suite in CI on Node 20/22 × Linux/macOS/Windows.
 - **After changing anything under `src/`, run `npm run bundle` and commit `dist/` in the same PR** — GitHub Actions executes the bundle, not the source. CI has a `dist-sync` check that will fail your PR if you forget.
 - Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) so `release-please` can cut releases automatically.
 - Sign-off (`git commit -s`) is required (DCO).

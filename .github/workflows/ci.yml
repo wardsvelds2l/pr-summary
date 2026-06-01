@@ -24,7 +24,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        node: ['18', '20', '22']
+        node: ['20', '22']
 
     steps:
       - name: Checkout
@@ -70,12 +70,12 @@ jobs:
           fi
           echo "Bundle loaded (expected GITHUB_REPOSITORY error is fine)."
 
-      - name: Upload coverage (Linux + Node 20 only)
-        if: matrix.os == 'ubuntu-latest' && matrix.node == '20'
+      - name: Upload coverage (Linux + Node 22 only)
+        if: matrix.os == 'ubuntu-latest' && matrix.node == '22'
         run: npm run test:coverage
 
       - name: Upload coverage to Codecov
-        if: matrix.os == 'ubuntu-latest' && matrix.node == '20'
+        if: matrix.os == 'ubuntu-latest' && matrix.node == '22'
         uses: codecov/codecov-action@v4
         with:
           files: ./coverage/lcov.info
@@ -99,7 +99,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
