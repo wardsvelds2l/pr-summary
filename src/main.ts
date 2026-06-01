@@ -127,8 +127,8 @@ export async function run(): Promise<void> {
 }
 
 async function handleError(err: unknown): Promise<void> {
-  const message = err instanceof Error ? `${err.message}\n${err.stack ?? ''}` : String(err);
-  core.debug(`pr-summary failed: ${message}`);
+  const internalMessage = err instanceof Error ? `${err.message}\n${err.stack ?? ''}` : String(err);
+  core.error(`pr-summary failed: ${internalMessage}`);
 
   try {
     const inputs = getInputs();
@@ -137,7 +137,7 @@ async function handleError(err: unknown): Promise<void> {
       repo: github.context.repo.repo
     });
     if (!context.ok) {
-      core.warning(`pr-summary failed before PR context was available: ${message}`);
+      core.warning(`pr-summary failed before PR context was available: ${internalMessage}`);
       return;
     }
     const octokit = github.getOctokit(inputs.githubToken);
@@ -148,7 +148,7 @@ async function handleError(err: unknown): Promise<void> {
         updateComment: (args: unknown) => Promise<{ data: { id: number } }>;
       };
     };
-    const body = buildErrorCommentBody(message);
+    const body = buildErrorCommentBody('The action could not generate a summary for this pull request. Please check the workflow run logs for details.');
     const id = await upsertComment(
       {
         list: { list: octokitAny.issues.listComments as never },

@@ -39,7 +39,9 @@ export interface OpenAIClient {
 export function createOpenAIClient(inputs: Pick<ActionInputs, 'openaiApiKey' | 'openaiBaseUrl'>): OpenAIClient {
   return new OpenAI({
     apiKey: inputs.openaiApiKey,
-    baseURL: inputs.openaiBaseUrl
+    baseURL: inputs.openaiBaseUrl,
+    timeout: 60_000,
+    maxRetries: 2,
   }) as unknown as OpenAIClient;
 }
 
