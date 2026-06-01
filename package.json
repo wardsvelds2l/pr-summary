@@ -1,0 +1,44 @@
+{
+  "name": "pr-summary",
+  "version": "0.1.0",
+  "description": "GitHub Action that posts LLM-generated summaries on pull requests.",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "bundle": "ncc build src/index.ts -o dist --source-map",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "all": "npm run lint && npm run typecheck && npm run test && npm run bundle"
+  },
+  "keywords": [
+    "github-actions",
+    "pull-request",
+    "llm",
+    "openai",
+    "summary"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@actions/core": "^1.11.1",
+    "@actions/github": "^6.0.0",
+    "openai": "^4.73.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "@vercel/ncc": "^0.38.3",
+    "@vitest/coverage-v8": "^1.6.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
+  }
+}

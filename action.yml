@@ -1,0 +1,48 @@
+name: 'PR Summary'
+description: 'Generate LLM-powered pull request summaries and post them as a single idempotent comment.'
+author: 'pr-summary contributors'
+branding:
+  icon: 'message-square'
+  color: 'blue'
+
+inputs:
+  github-token:
+    description: 'GitHub token used to read the diff and post the comment.'
+    required: true
+  openai-api-key:
+    description: 'API key for an OpenAI-compatible LLM endpoint.'
+    required: true
+  openai-base-url:
+    description: 'Base URL for the OpenAI-compatible API. Defaults to https://api.openai.com/v1.'
+    required: false
+    default: 'https://api.openai.com/v1'
+  model:
+    description: 'Model name passed to the LLM. Defaults to gpt-4o-mini.'
+    required: false
+    default: 'gpt-4o-mini'
+  max-diff-chars:
+    description: 'If the diff exceeds this many characters, it is split by file and summarized per-file.'
+    required: false
+    default: '120000'
+  summary-style:
+    description: 'Summary style. "brief" is a 3-bullet summary, "detailed" has sections (What changed, Why, Risks, Test plan).'
+    required: false
+    default: 'detailed'
+  language:
+    description: 'BCP-47 language code for the generated comment (e.g. en, ru, ja).'
+    required: false
+    default: 'en'
+  trigger-event:
+    description: 'When to run. "opened" runs on opened/reopened only, "all" also runs on synchronize.'
+    required: false
+    default: 'all'
+
+outputs:
+  comment-id:
+    description: 'ID of the posted or updated bot comment.'
+  summary-length:
+    description: 'Character length of the generated summary.'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
