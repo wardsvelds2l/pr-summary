@@ -1,7 +1,7 @@
 node_modules/
-dist/
 lib/
 coverage/
+scripts/build/
 *.log
 .DS_Store
 .env
@@ -10,3 +10,11 @@ coverage/
 .vscode/
 .idea/
 *.tsbuildinfo
+# Defensive: stray compiled JS/TS inside src/ would shadow the source for
+# vite/vitest and silently break tests. The build script (tsconfig.build.json)
+# emits to lib/, never src/, but if a contributor changes that, the .gitignore
+# catches it.
+src/*.js
+src/*.js.map
+# dist/ is intentionally NOT ignored — GitHub Actions requires the bundled
+# dist/index.js to be present at the tagged commit. See CONTRIBUTING.md.

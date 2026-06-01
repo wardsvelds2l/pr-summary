@@ -1,28 +1,69 @@
 {
   "name": "pr-summary",
-  "version": "0.1.0",
-  "description": "GitHub Action that posts LLM-generated summaries on pull requests.",
+  "version": "0.2.0",
+  "description": "Drop-in GitHub Action that posts AI-generated summaries of pull request diffs as a single idempotent comment. Works with any OpenAI-compatible API (OpenAI, Azure, Groq, OpenRouter, Anthropic via proxy, local LLMs).",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist coverage lib",
+    "prebuild": "npm run clean",
+    "prebundle": "npm run clean",
+    "prepublishOnly": "npm run all",
     "bundle": "ncc build src/index.ts -o dist --source-map",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write .",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
-    "all": "npm run lint && npm run typecheck && npm run test && npm run bundle"
+    "all": "npm run lint && npm run typecheck && npm run test && npm run bundle",
+    "examples:comment": "tsc -p scripts/tsconfig.json && node scripts/build/scripts/generate-example-comment.js",
+    "bench": "tsc -p scripts/tsconfig.json && node scripts/build/scripts/bench.js"
   },
   "keywords": [
     "github-actions",
+    "github-action",
     "pull-request",
+    "pr-review",
+    "code-review",
     "llm",
     "openai",
-    "summary"
+    "openai-compatible",
+    "ai-summary",
+    "claude",
+    "gpt",
+    "anthropic",
+    "automation",
+    "summary",
+    "ci"
   ],
   "license": "MIT",
   "engines": {
-    "node": ">=20"
+    "node": ">=18",
+    "npm": ">=9",
+    "pnpm": ">=8",
+    "yarn": ">=1.22"
+  },
+  "files": [
+    "dist",
+    "action.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wardsvelds2l/pr-summary.git"
+  },
+  "homepage": "https://github.com/wardsvelds2l/pr-summary#readme",
+  "bugs": {
+    "url": "https://github.com/wardsvelds2l/pr-summary/issues"
+  },
+  "author": {
+    "name": "wardsvelds2l",
+    "url": "https://github.com/wardsvelds2l"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "dependencies": {
     "@actions/core": "^1.11.1",

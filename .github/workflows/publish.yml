@@ -1,0 +1,55 @@
+name: Publish to npm
+
+# Triggered by the GitHub release that release-please creates when its
+# release PR is merged. The release-please action tags the commit and
+# creates a GitHub Release; this workflow then publishes to npm.
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: npm publish (provenance)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: npm-publish
+      url: https://www.npmjs.com/package/pr-summary
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Full history so npm can read the provenance inputs.
+          fetch-depth: 0
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: https://registry.npmjs.org/
+
+      - name: Install dependencies (clean)
+        run: npm ci
+
+      - name: Lint, typecheck, test, bundle
+        run: npm run all
+
+      - name: Verify dist/ is in sync with src/
+        # Belt-and-braces: if a maintainer forgot to rebuild dist/ before
+        # merging the release PR, do it here so the published tarball
+        # matches the source.
+        run: |
+          if ! git diff --exit-code -- dist/; then
+            echo "::warning::dist/ was out of sync. Rebuilding…"
+            npm run bundle
+            git add dist/
+            git commit -m "chore: rebuild dist for release ${{ github.ref_name }}" --no-verify
+          fi
+
+      - name: Publish to npm
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

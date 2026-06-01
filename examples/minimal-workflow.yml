@@ -1,0 +1,19 @@
+# Minimal pr-summary workflow.
+# Posts (and updates) one AI summary comment on every PR.
+name: PR Summary
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  summary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: wardsvelds2l/pr-summary@v0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}

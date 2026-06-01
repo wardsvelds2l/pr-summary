@@ -1,0 +1,38 @@
+name: Release Please
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Release Please
+        uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          # Monorepo-friendly defaults; the project is single-package but
+          # telling release-please the package name makes the resulting PR
+          # header explicit.
+          release-type: node
+          package-name: pr-summary
+          # Generate one release PR per component; we have only one.
+          include-component-in-tag: true
+          # Conventional commits drive the version bump and the changelog.
+          changelog-path: CHANGELOG.md
+          # Always produce a PR — never push a tag directly.
+          always-pull-request: true
+
+      - name: Rebuild dist/ inside the release PR
+        # release-please opens a PR bumping the version in package.json.
+        # CI on that PR will run the full matrix (including the dist-sync
+        # job), so the merged commit already has a fresh dist/index.js.
+        if: steps.release.outputs.pr != ''
+        run: |
+          echo "Release PR opened: ${{ steps.release.outputs.pr }}"
+          echo "CI will run npm run bundle on the release PR."

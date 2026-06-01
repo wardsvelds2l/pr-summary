@@ -1,0 +1,54 @@
+# Using pr-summary with Anthropic's API.
+#
+# IMPORTANT: Anthropic's first-party API does NOT speak the OpenAI protocol.
+# To use Anthropic models with pr-summary you need a proxy that translates
+# OpenAI-style chat completions into Anthropic-format messages. The two most
+# common options:
+#
+#   1. LiteLLM (https://github.com/BerriAI/litellm) — `pip install litellm[proxy]`
+#      and run `litellm --model claude-3-5-sonnet-latest`. It exposes an
+#      OpenAI-compatible /v1 endpoint on http://localhost:4000.
+#
+#   2. OpenRouter (https://openrouter.ai) — a hosted proxy that fronts
+#      Anthropic and many other providers. Set openai-base-url to
+#      https://openrouter.ai/api/v1 and pass the OpenRouter API key.
+#
+# If you point pr-summary at https://api.anthropic.com directly the action
+# WILL FAIL — Anthropic returns a 404 for /v1/chat/completions.
+name: PR Summary (Anthropic via proxy)
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  summary:
+    runs-on: ubuntu-latest
+    steps:
+      # --- Option A: LiteLLM running as a sibling service in the same job ---
+      - name: Start LiteLLM proxy
+        run: |
+          pip install 'litellm[proxy]'
+          litellm --model claude-3-5-sonnet-latest --port 4000 &
+          for i in {1..30}; do
+            curl -fsS http://localhost:4000/health/liveliness && break
+            sleep 1
+          done
+
+      - uses: wardsvelds2l/pr-summary@v0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          openai-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          openai-base-url: http://localhost:4000/v1
+          model: claude-3-5-sonnet-latest
+
+      # --- Option B: OpenRouter (no extra service) ---
+      # - uses: wardsvelds2l/pr-summary@v0
+      #   with:
+      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+      #     openai-api-key: ${{ secrets.OPENROUTER_API_KEY }}
+      #     openai-base-url: https://openrouter.ai/api/v1
+      #     model: anthropic/claude-3.5-sonnet

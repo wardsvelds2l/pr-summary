@@ -1,0 +1,65 @@
+# Self-hosted LLMs (Ollama, LM Studio, llama.cpp, vLLM, etc.).
+#
+# The action talks the standard OpenAI /v1/chat/completions protocol, so any
+# local server that exposes it works. Below is the setup for the two most
+# common ones as of 2025.
+name: PR Summary (self-hosted)
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  # ---------------- Ollama ----------------
+  # Run an Ollama container that hosts, for example, Llama 3.1 8B.
+  # Exposes an OpenAI-compatible API on :11434/v1.
+  summary-ollama:
+    name: Summary (Ollama, llama3.1)
+    runs-on: [self-hosted, linux, x64, gpu]   # a label that picks a GPU runner
+    services:
+      ollama:
+        image: ollama/ollama:latest
+        ports:
+          - 11434:11434
+        options: --gpus all
+    steps:
+      - name: Wait for Ollama
+        run: |
+          for i in {1..60}; do
+            curl -fsS http://localhost:11434/api/tags && break
+            sleep 1
+          done
+
+      - name: Pull model
+        run: ollama pull llama3.1
+
+      - uses: wardsvelds2l/pr-summary@v0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          # Ollama does not require an API key, but the OpenAI client
+          # demands the field is non-empty — use any placeholder.
+          openai-api-key: ollama
+          openai-base-url: http://localhost:11434/v1
+          model: llama3.1
+          # Local models are slower — lower the chunk threshold so the
+          # meta-summary prompt fits in a smaller context window.
+          max-diff-chars: '40000'
+
+  # ---------------- LM Studio ----------------
+  # LM Studio exposes an OpenAI-compatible local server on :1234/v1.
+  # Run it on the runner host before the workflow starts (or via the
+  # LM Studio CLI in headless mode), then point the action at it.
+  summary-lmstudio:
+    name: Summary (LM Studio)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: wardsvelds2l/pr-summary@v0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          openai-api-key: lm-studio
+          openai-base-url: http://localhost:1234/v1
+          model: qwen2.5-coder-7b-instruct
+          max-diff-chars: '60000'

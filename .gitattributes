@@ -1,0 +1,20 @@
+# Auto-detect text files and normalise line endings to LF.
+* text=auto eol=lf
+
+# dist/ is a generated build artefact. Lock it out of language diffs and tell
+# GitHub it's machine-generated so it doesn't pollute the language stats.
+dist/* -diff linguist-generated
+
+# Source map files have an obvious extension but the action doesn't need them
+# to run; they are kept for debugging only.
+dist/*.map -diff
+
+# YAML and Markdown files in .github/ should never carry a BOM.
+.github/**/*.yml binary
+.github/**/*.md text eol=lf
+
+# Shell scripts and other executable text.
+*.sh text eol=lf
+*.ts text eol=lf
+*.js text eol=lf
+*.json text eol=lf

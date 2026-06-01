@@ -1,0 +1,55 @@
+# Detailed pr-summary workflow.
+# Every input is set explicitly. Useful as a reference and as a starting point
+# for organisations that want a fully pinned configuration.
+name: PR Summary (detailed)
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+# Minimum permissions: read the PR diff, write PR comments.
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  summary:
+    runs-on: ubuntu-latest
+    # Skip draft PRs — reviewers don't see them anyway.
+    if: github.event.pull_request.draft == false
+    steps:
+      - name: PR Summary
+        uses: wardsvelds2l/pr-summary@v0
+        with:
+          # GitHub token (defaults to the workflow-provided GITHUB_TOKEN).
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+          # OpenAI-compatible API key. Works with OpenAI, Azure OpenAI,
+          # Groq, OpenRouter, Together, etc. See other examples in this
+          # directory for Anthropic and self-hosted setups.
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+
+          # Base URL of the OpenAI-compatible API. Default is OpenAI's.
+          # Examples:
+          #   https://api.openai.com/v1                 (default)
+          #   https://your-resource.openai.azure.com/openai/deployments/<name>
+          #   https://api.groq.com/openai/v1
+          #   https://openrouter.ai/api/v1
+          #   http://localhost:11434/v1                 (Ollama)
+          openai-base-url: https://api.openai.com/v1
+
+          # Model name passed to the LLM. Anything the provider supports.
+          model: gpt-4o-mini
+
+          # If the diff is longer than this many characters, the action
+          # splits it by file and runs one per-file call + one meta-summary.
+          max-diff-chars: '120000'
+
+          # 'detailed' (sections) or 'brief' (3 bullets).
+          summary-style: detailed
+
+          # BCP-47 language tag. Supported: en, ru, ja, zh, es, fr, de, pt,
+          # ko, it, tr, ar, hi, pl, uk. Unknown tags fall back to English.
+          language: en
+
+          # 'opened' runs only on opened/reopened, 'all' also on synchronize.
+          trigger-event: all

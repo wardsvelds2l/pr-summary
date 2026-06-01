@@ -5,7 +5,7 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 2022,
     sourceType: 'module',
-    project: './tsconfig.json'
+    project: ['./tsconfig.json', './tsconfig.eslint.json']
   },
   plugins: ['@typescript-eslint'],
   extends: [
@@ -20,5 +20,5 @@ module.exports = {
     '@typescript-eslint/no-non-null-assertion': 'off',
     'no-console': 'off'
   },
-  ignorePatterns: ['dist/', 'lib/', 'node_modules/', 'coverage/']
+  ignorePatterns: ['dist/', 'lib/', 'node_modules/', 'coverage/', 'scripts/build/']
 };
