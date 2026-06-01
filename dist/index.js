@@ -35859,10 +35859,18 @@ function getInputs() {
     const summaryStyle = (core.getInput('summary-style') || 'detailed').toLowerCase();
     const triggerEvent = (core.getInput('trigger-event') || 'all').toLowerCase();
     const maxDiffCharsRaw = core.getInput('max-diff-chars') || '120000';
+    const githubToken = core.getInput('github-token') || process.env.GITHUB_TOKEN || '';
+    const openaiApiKey = core.getInput('openai-api-key') || process.env.OPENAI_API_KEY || '';
+    const openaiBaseUrl = core.getInput('openai-base-url') || 'https://api.openai.com/v1';
+    if (githubToken)
+        core.setSecret(githubToken);
+    if (openaiApiKey)
+        core.setSecret(openaiApiKey);
+    validateOpenAIBaseUrl(openaiBaseUrl);
     return {
-        githubToken: core.getInput('github-token') || process.env.GITHUB_TOKEN || '',
-        openaiApiKey: core.getInput('openai-api-key') || process.env.OPENAI_API_KEY || '',
-        openaiBaseUrl: core.getInput('openai-base-url') || 'https://api.openai.com/v1',
+        githubToken,
+        openaiApiKey,
+        openaiBaseUrl,
         model: core.getInput('model') || 'gpt-4o-mini',
         maxDiffChars: parsePositiveInt(maxDiffCharsRaw, 120000),
         summaryStyle: validateEnum(summaryStyle, ['brief', 'detailed'], 'detailed'),
@@ -35879,6 +35887,38 @@ function parsePositiveInt(value, fallback) {
 }
 function validateEnum(value, allowed, fallback) {
     return allowed.includes(value) ? value : fallback;
+}
+function isPrivate172(hostname) {
+    if (!hostname.startsWith('172.'))
+        return false;
+    const parts = hostname.split('.');
+    if (parts.length < 2)
+        return false;
+    const secondOctet = Number.parseInt(parts[1], 10);
+    return Number.isFinite(secondOctet) && secondOctet >= 16 && secondOctet <= 31;
+}
+function validateOpenAIBaseUrl(url) {
+    let parsed;
+    try {
+        parsed = new URL(url);
+    }
+    catch {
+        throw new Error(`Invalid openai-base-url: "${url}" is not a valid URL.`);
+    }
+    if (parsed.protocol !== 'https:') {
+        throw new Error(`Invalid openai-base-url: "${url}" must use HTTPS.`);
+    }
+    const hostname = parsed.hostname.toLowerCase().replace(/^\[(.*)\]$/, '$1');
+    if (hostname === 'localhost' ||
+        hostname === '127.0.0.1' ||
+        hostname === '0.0.0.0' ||
+        hostname === '::1' ||
+        hostname.startsWith('10.') ||
+        isPrivate172(hostname) ||
+        hostname.startsWith('192.168.') ||
+        hostname.startsWith('169.254.')) {
+        throw new Error(`Invalid openai-base-url: "${url}" points to a private/local address.`);
+    }
 }
 
 
@@ -36008,8 +36048,8 @@ async function run() {
     }
 }
 async function handleError(err) {
-    const message = err instanceof Error ? `${err.message}\n${err.stack ?? ''}` : String(err);
-    core.debug(`pr-summary failed: ${message}`);
+    const internalMessage = err instanceof Error ? `${err.message}\n${err.stack ?? ''}` : String(err);
+    core.error(`pr-summary failed: ${internalMessage}`);
     try {
         const inputs = (0, inputs_js_1.getInputs)();
         const context = resolveContext(github.context.eventName, github.context.payload, {
@@ -36017,12 +36057,12 @@ async function handleError(err) {
             repo: github.context.repo.repo
         });
         if (!context.ok) {
-            core.warning(`pr-summary failed before PR context was available: ${message}`);
+            core.warning(`pr-summary failed before PR context was available: ${internalMessage}`);
             return;
         }
         const octokit = github.getOctokit(inputs.githubToken);
         const octokitAny = octokit;
-        const body = (0, comment_js_1.buildErrorCommentBody)(message);
+        const body = (0, comment_js_1.buildErrorCommentBody)('The action could not generate a summary for this pull request. Please check the workflow run logs for details.');
         const id = await (0, comment_js_1.upsertComment)({
             list: { list: octokitAny.issues.listComments },
             create: {
@@ -36151,7 +36191,9 @@ const prompt_js_1 = __nccwpck_require__(705);
 function createOpenAIClient(inputs) {
     return new openai_1.default({
         apiKey: inputs.openaiApiKey,
-        baseURL: inputs.openaiBaseUrl
+        baseURL: inputs.openaiBaseUrl,
+        timeout: 60_000,
+        maxRetries: 2,
     });
 }
 function createSummarizer(client, inputs) {

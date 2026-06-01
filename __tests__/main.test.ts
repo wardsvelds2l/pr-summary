@@ -6,9 +6,9 @@ import type { PrComment } from '../src/comment.js';
 const { openaiCreate, openaiCtor, pullsGet, issueCommentsList, issueCommentsCreate, issueCommentsUpdate } =
   vi.hoisted(() => {
     const openaiCreate = vi.fn();
-    const openaiCtor = vi.fn().mockImplementation(() => ({
-      chat: { completions: { create: openaiCreate } }
-    }));
+  const openaiCtor = vi.fn(function () {
+    return { chat: { completions: { create: openaiCreate } } };
+  });
     return {
       openaiCreate,
       openaiCtor,
@@ -68,6 +68,7 @@ vi.mock('@actions/core', () => ({
     return v;
   }),
   setOutput: vi.fn(),
+  setSecret: vi.fn(),
   info: vi.fn(),
   debug: vi.fn(),
   warning: vi.fn(),
@@ -214,7 +215,7 @@ describe('main run()', () => {
 
     expect(issueCommentsCreate).toHaveBeenCalledTimes(1);
     const body = (issueCommentsCreate.mock.calls[0]?.[0] as { body: string }).body;
-    expect(body).toContain('upstream LLM exploded');
+    expect(body).toContain('PR Summary');
     expect(body).toContain(COMMENT_MARKER);
   });
 
