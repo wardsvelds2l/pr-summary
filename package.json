@@ -1,6 +1,6 @@
 {
   "name": "pr-summary",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "Drop-in GitHub Action that posts AI-generated summaries of pull request diffs as a single idempotent comment. Works with any OpenAI-compatible API (OpenAI, Azure, Groq, OpenRouter, Anthropic via proxy, local LLMs).",
   "main": "dist/index.js",
   "scripts": {
