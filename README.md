@@ -26,6 +26,8 @@ Reviewers can glance at the summary, jump straight to the files that matter, and
 
 ## Quick start
 
+### Use in a GitHub Action workflow
+
 Create `.github/workflows/pr-summary.yml` in your repo:
 
 ```yaml
@@ -49,6 +51,28 @@ jobs:
 ```
 
 Add an `OPENAI_API_KEY` secret and you are done. The action will post (and update on every push) a single summary comment.
+
+### Run locally (development / testing)
+
+```bash
+git clone https://github.com/wardsvelds2l/pr-summary.git
+cd pr-summary
+npm install
+npm run all          # typecheck → lint → test → build → bundle
+```
+
+`dist/index.js` is the bundled action entrypoint (built with `@vercel/ncc`). It is meant to run inside the GitHub Actions runtime — it expects `GITHUB_TOKEN`, `OPENAI_API_KEY`, and `INPUT_*` environment variables injected by the runner.
+
+For local testing you can:
+- Use [`act`](https://github.com/nektos/act) to run the action locally.
+- Run the example script that generates a comment from a patch:
+  ```bash
+  npm run examples:comment
+  ```
+- Execute the test suite:
+  ```bash
+  npm test
+  ```
 
 ## Demo
 
